@@ -63,6 +63,11 @@ def index():
 @app.route('/main',methods=['GET', 'POST'])
 # @login_required
 def main():
+
+   stations=[]
+   for station in t.tube_data.keys():
+     stations.append(station)
+     
    if request.method == 'POST':
      start_point = request.form["start_point"]
      end_point = request.form["end_point"]
@@ -70,7 +75,7 @@ def main():
      session["end_point"] = end_point
      return redirect(url_for("result"))
    else:
-     return render_template('main.html')
+     return render_template('main.html', stations=stations)
 
 @app.route('/result')
 def result():
