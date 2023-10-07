@@ -82,7 +82,9 @@ def result():
   if "start_point" and "end_point" in session:
     start_point = session["start_point"]
     end_point = session["end_point"]
-    return(nx.dijkstra_path(tube_map,start_point,end_point))
+    stations = nx.dijkstra_path(tube_map,start_point,end_point)
+    cost = (nx.dijkstra_path_length(tube_map,start_point,end_point))*5
+    return render_template('result.html', stations=stations, cost=cost)
     
     
   else:
