@@ -6,6 +6,9 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 import networkx as nx
 import matplotlib.pyplot as plt
 import tube as t
+from werkzeug.security import generate_password_hash, check_password_hash
+
+
 
 tube_map = nx.Graph()
 for station in t.tube_data.keys():
@@ -20,9 +23,14 @@ app.secret_key = "hello_wrld"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 
+app.config['SECRET_KEY'] = 'Mattisthebestprogrammerintheworld!'
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 
-class UserDetails(db.Model):
+
+class UserDetails(UserMixin,db.Model):
   __tablename__ = "UserDetails"
   id = db.Column(db.Integer, primary_key=True)
   first_name = db.Column(db.String(32))
@@ -37,6 +45,10 @@ class UserSearches(db.Model):
   user_id = db.Column(db.Integer)
   start_station = db.Column(db.String(32))
   end_station = db.Column(db.String(32))
+
+@login_manager.user_loader
+def load_user(user_id):
+  return UserDetails.query.get(int(user_id))
   
 @app.route('/start')
 def start():
@@ -50,18 +62,23 @@ def register():
     username = request.form.get('username')
     city = request.form.get('city')
     password = request.form.get('password')
-    new_user = UserDetails(first_name=first_name, last_name=last_name, username=username, city=city, password=password)
+    hashed_password = generate_password_hash(password)
+    new_user = UserDetails(first_name=first_name, last_name=last_name, username=username, city=city, password=hashed_password)
     db.session.add(new_user)
     db.session.commit()
+    login()
     return redirect(url_for('main'))
   return render_template('register.html')
 
 @app.route('/')
 def index():
-    return render_template('base.html')
+  if current_user.is_authenticated:
+    return redirect(url_for('main'))
+  else:
+    return redirect(url_for('login'))
 
 @app.route('/main',methods=['GET', 'POST'])
-# @login_required
+@login_required
 def main():
 
    stations=[]
@@ -75,16 +92,17 @@ def main():
      session["end_point"] = end_point
      return redirect(url_for("result"))
    else:
-     return render_template('main.html', stations=stations)
-
-@app.route('/result')
+     return render_template('main.html', stations=stations, current_user=current_user)
+@login_required
+@app.route('/result',methods=['GET', 'POST'])
 def result():
   if "start_point" and "end_point" in session:
     start_point = session["start_point"]
     end_point = session["end_point"]
     stations = nx.dijkstra_path(tube_map,start_point,end_point)
     cost = (nx.dijkstra_path_length(tube_map,start_point,end_point))*5
-    return render_template('result.html', stations=stations, cost=cost)
+    rounded_cost = round(cost, 2)
+    return render_template('result.html', stations=stations, cost=rounded_cost)
     
     
   else:
@@ -93,9 +111,32 @@ def result():
   
     # return render_template('result.html')
 
-@app.route('/login')
+@app.route('/login',methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
+  if current_user.is_authenticated:
+    return redirect(url_for('main'))
+  if request.method == 'POST':
+    username = request.form.get('username')
+    password = request.form.get('password')
+    user = UserDetails.query.filter_by(username=username).first()
+    print(user)
+    if user:
+      if check_password_hash(user.password, password):
+        login_user(user)
+        session['username'] = current_user.username
+        session['first_name'] = current_user.first_name
+        session['last_name'] = current_user.last_name
+        return redirect(url_for('main'))
+      else:
+        return render_template('login.html', error='Wrong username or password')
+        
+  
+  
+  return render_template('login.html')
 
-
+@app.route('/logout/')
+@login_required
+def logout():
+	logout_user()
+	return redirect(url_for('index'))
 app.run(host='0.0.0.0', port=81)

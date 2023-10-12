@@ -1,6 +1,7 @@
 {% extends 'base.html'%}
 {% block content %}
-<form action="#" method='post'>
+<div class="option" >
+<form class='form' action="#" method='post'>
   <!-- <div class="form-group">
     <label for="formGroupExampleInput">Enter starting point</label>
     <input type="text" class="form-control" name='start_point'id="formGroupExampleInput" placeholder="input">
@@ -9,6 +10,8 @@
     <label for="formGroupExampleInput2">Enter Destination</label>
     <input type="text" class="form-control" name='end_point' id="formGroupExampleInput2" placeholder="input">
   </div> -->
+  {{current_user.first_name}}
+  {{current_user.last_name}}
   <select name="start_point" id="start_point">
     {% for station in stations %}
     <option value="{{station}}">{{station}}</option>
@@ -21,5 +24,6 @@
   </select>
   <button type="submit" class="btn btn-light">submit </button> 
 </form>
+</div>
 {% endblock %}
 <!-- {{form.submit()}} -->

@@ -1,21 +1,26 @@
 {% extends 'base.html'%}
 
 {% block content %}
-
-{% for station in stations %}
-<div class="station">
+<div class="container">
+  {% for station in stations %}
+<!-- <div class="station">
   {{station}}
+</div> -->
+<div class="d-inline p-2 bg-primary text-white">{{station}}</div>
+
+{% endfor %}
+<div class="d-inline p-2 bg-dark text-white">£{{cost}}</div>
 </div>
 
-  
-{% endfor %}
 
-<div class ="cost">
+<!-- <div class ="cost">
   {{cost}}
 </div>
-<img
-  src="{{ url_for('static', filename='images/orange.jpeg') }}"
-  class="image"
-/>
+
+<div class="cost">
+  {{cost}}
+</div> -->
+<!-- <div class="d-inline p-2 bg-dark text-white">{{cost}}</div>
+ -->
 
 {% endblock %}
