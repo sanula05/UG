@@ -52,7 +52,7 @@ def load_user(user_id):
   
 @app.route('/start')
 def start():
-    return render_template('start.html')
+    return render_template('start.html', current_user=current_user)
 
 @app.route('/register',methods=['GET', 'POST'])
 def register():
@@ -100,9 +100,13 @@ def result():
     start_point = session["start_point"]
     end_point = session["end_point"]
     stations = nx.dijkstra_path(tube_map,start_point,end_point)
+    del stations[0]
+    del stations[len(stations)-1]
     cost = (nx.dijkstra_path_length(tube_map,start_point,end_point))*5
+    peak_cost = cost * 1.2
+    av_price = cost/(nx.dijkstra_path_length(tube_map,start_point,end_point))
     rounded_cost = round(cost, 2)
-    return render_template('result.html', stations=stations, cost=rounded_cost)
+    return render_template('result.html', current_user=current_user,av_price=av_price,peak_cost=peak_cost, stations=stations, cost=rounded_cost, end_point=end_point, start_point=start_point)
     
     
   else:
@@ -128,7 +132,7 @@ def login():
         session['last_name'] = current_user.last_name
         return redirect(url_for('main'))
       else:
-        return render_template('login.html', error='Wrong username or password')
+        return render_template('login.html', error='Wrong username or password', current_user=current_user)
         
   
   

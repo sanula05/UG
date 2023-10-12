@@ -2,25 +2,43 @@
 
 {% block content %}
 <div class="container">
+  <div class="station-row">
+    <div class="terminal-station">
+      <i class="bi bi-geo-alt"></i>
+      {{start_point}}
+    </div>  
+  </div>
+
   {% for station in stations %}
-<!-- <div class="station">
-  {{station}}
-</div> -->
-<div class="d-inline p-2 bg-primary text-white">{{station}}</div>
+  <div class="station-row">
+     <div class="station-box">
+       
+      <i class="bi bi-compass"></i>
+       {{station}}
+     </div>
+  </div>
 
 {% endfor %}
-<div class="d-inline p-2 bg-dark text-white">£{{cost}}</div>
+  <div class="station-row">
+    <div class="terminal-station">
+      <i class="bi bi-pin-map"></i>
+      {{end_point}}
+    </div>  
+  </div>
 </div>
-
-
-<!-- <div class ="cost">
-  {{cost}}
-</div>
-
-<div class="cost">
-  {{cost}}
-</div> -->
-<!-- <div class="d-inline p-2 bg-dark text-white">{{cost}}</div>
- -->
+<footer>
+  <div class="section">
+    <h1>£{{cost}}</h1>
+    <h3>Price</h3>
+  </div>
+  <div class="section">
+    <h1>£{{peak_cost}}</h1>
+    <h3>Peak Price</h3>
+  </div>
+  <div class="section">
+    <h1>£{{av_price}}</h1>
+    <h3>Price Per Mile</h3>
+  </div>
+</footer>
 
 {% endblock %}
