@@ -56,6 +56,11 @@
   color: #363636;
   width: 40%;
   transition:transform 0.3s ease-in-out 0s;
+  animation: fallInFromAbove 2s forwards;
+  animation-delay: 3s;
+  overflow: hidden;
+
+  
 }
 i {
   font-size: 1.5rem;
@@ -76,6 +81,7 @@ i {
   align-items: center;
   justify-content: center;
   position: relative;
+
 }
 .cost{
   padding: 10px;
@@ -109,6 +115,7 @@ footer {
   left: 0;
   background-color: white;
   display: flex;
+  animation: slideInFromBottom 3s forwards;
 }
 .section {
   height: 100%;
@@ -118,6 +125,10 @@ footer {
   justify-content: center;
   flex-direction: column;
   border-left: 1px solid #363636;
+  
+  
+  
+  
 }
 .section:nth-child(1) {
   border-left: 0;
@@ -133,4 +144,26 @@ footer {
 .station-row:hover{
   transform: translateX(-15px);
 
+}
+
+
+@keyframes slideInFromBottom {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+@keyframes fallInFromAbove {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
