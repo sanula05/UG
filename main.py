@@ -46,6 +46,21 @@ class UserSearches(db.Model):
   start_station = db.Column(db.String(32))
   end_station = db.Column(db.String(32))
 
+class Stations(db.Model):
+  __tablename__ = "Stations"
+  id = db.Column(db.Integer, primary_key=True)
+  name = db.Column(db.String(32))
+  info = db.Column(db.String(100))
+  
+class UserSearches(db.Model):
+  __tablename__ = "UserSearches"
+  id = db.Column(db.Integer, primary_key=True)
+  user_id = db.Column(db.Integer)
+  start_station = db.Column(db.String(32))
+  end_station = db.Column(db.String(32))
+  
+  
+
 @login_manager.user_loader
 def load_user(user_id):
   return UserDetails.query.get(int(user_id))
@@ -103,9 +118,9 @@ def result():
     del stations[0]
     del stations[len(stations)-1]
     cost = (nx.dijkstra_path_length(tube_map,start_point,end_point))*5
-    peak_cost = cost * 1.2
-    av_price = cost/(nx.dijkstra_path_length(tube_map,start_point,end_point))
-    rounded_cost = round(cost, 2)
+    peak_cost = str(round(cost * 1.2, 3))
+    av_price = str(round(cost/(nx.dijkstra_path_length(tube_map,start_point,end_point)),3))
+    rounded_cost = str(round(cost, 3))
     return render_template('result.html', current_user=current_user,av_price=av_price,peak_cost=peak_cost, stations=stations, cost=rounded_cost, end_point=end_point, start_point=start_point)
     
     
@@ -137,6 +152,17 @@ def login():
   
   
   return render_template('login.html')
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('500.html'), 500
+
+@app.route('/stations',methods=['GET', 'POST'])
+@app.route('/stations/<int:station_id>',methods=['GET', 'POST'])
+def stations(station_id=None):
+  if station_id:
+    pass
+  return render_template('stations.html')
+
 
 @app.route('/logout/')
 @login_required
