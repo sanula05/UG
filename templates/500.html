@@ -1,14 +1,15 @@
 {% extends 'base.html'%}
+{% block head %}<link rel="stylesheet" href="{{url_for('static', filename='css/500.css')}}">{% endblock %}
 {% block content %}
 
 
 <body>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>500 Internal Server Error</title>
-  <h1>500 Internal Server Error</h1>
-  <p>Sorry, there was an internal server error.</p>
+    <div class="error-container">
+        <h1>Internal Server Error (500)</h1>
+        <p>Sorry, something went wrong on our end. We're working to fix it.</p>
+        <div class="back-to-home">
+            <a href="/">Back to Home</a>
+        </div>
+    </div>
 </body>
-</html>
 {% endblock %}

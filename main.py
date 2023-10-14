@@ -1,3 +1,4 @@
+#IMPORTS
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import desc, asc
@@ -9,7 +10,7 @@ import tube as t
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-
+#POPULATES THE GRAPH 
 tube_map = nx.Graph()
 for station in t.tube_data.keys():
     tube_map.add_node(station)
@@ -17,19 +18,35 @@ for station in t.tube_data.keys():
 for start_station, connections in t.tube_data.items():
     for end_station, distance in connections.items():
         tube_map.add_edge(start_station, end_station, weight=distance)
+#COST CALCUTAION FUNCTIONS
+def UPrice(start,end):
+  cost = nx.dijkstra_path_length(tube_map, start, end) * 5
+  return cost
 
+def UPeakPrice(start,end):
+  cost = nx.dijkstra_path_length(tube_map, start, end) * 5 * 1.2
+  return cost
+
+def UPricePerMile(start,end):
+  distance = nx.dijkstra_path_length(tube_map, start, end)
+  cost_per_mile = ((distance * 5 )/ distance)
+  return cost_per_mile
+
+
+#INITIALISE FLASK
 app = Flask(__name__)
 app.secret_key = "hello_wrld"
+#INITIALISE SLQALCHEMY
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
-
+#LOGIN SYSTEM
 app.config['SECRET_KEY'] = 'Mattisthebestprogrammerintheworld!'
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 
-
+#DATABASE TABLES
 class UserDetails(UserMixin,db.Model):
   __tablename__ = "UserDetails"
   id = db.Column(db.Integer, primary_key=True)
@@ -39,12 +56,12 @@ class UserDetails(UserMixin,db.Model):
   city = db.Column(db.String(32))
   password = db.Column(db.String(32))
 
-class UserSearches(db.Model):
-  __tablename__ = "UserSearches"
-  id = db.Column(db.Integer, primary_key=True)
-  user_id = db.Column(db.Integer)
-  start_station = db.Column(db.String(32))
-  end_station = db.Column(db.String(32))
+# class UserSearches(db.Model):
+#   __tablename__ = "UserSearches"
+#   id = db.Column(db.Integer, primary_key=True)
+#   user_id = db.Column(db.Integer)
+#   start_station = db.Column(db.String(32))
+#   end_station = db.Column(db.String(32))
 
 class Stations(db.Model):
   __tablename__ = "Stations"
@@ -52,15 +69,7 @@ class Stations(db.Model):
   name = db.Column(db.String(32))
   info = db.Column(db.String(100))
   
-class UserSearches(db.Model):
-  __tablename__ = "UserSearches"
-  id = db.Column(db.Integer, primary_key=True)
-  user_id = db.Column(db.Integer)
-  start_station = db.Column(db.String(32))
-  end_station = db.Column(db.String(32))
-  
-  
-
+#LOGIN MANAGER
 @login_manager.user_loader
 def load_user(user_id):
   return UserDetails.query.get(int(user_id))
@@ -68,7 +77,7 @@ def load_user(user_id):
 @app.route('/start')
 def start():
     return render_template('start.html', current_user=current_user)
-
+#REGISTER PAGE
 @app.route('/register',methods=['GET', 'POST'])
 def register():
   if request.method == 'POST':
@@ -91,7 +100,7 @@ def index():
     return redirect(url_for('main'))
   else:
     return redirect(url_for('login'))
-
+#PATH CALCULATOR
 @app.route('/main',methods=['GET', 'POST'])
 @login_required
 def main():
@@ -108,6 +117,7 @@ def main():
      return redirect(url_for("result"))
    else:
      return render_template('main.html', stations=stations, current_user=current_user)
+#RESULTS PAGE
 @login_required
 @app.route('/result',methods=['GET', 'POST'])
 def result():
@@ -117,10 +127,10 @@ def result():
     stations = nx.dijkstra_path(tube_map,start_point,end_point)
     del stations[0]
     del stations[len(stations)-1]
-    cost = (nx.dijkstra_path_length(tube_map,start_point,end_point))*5
-    peak_cost = str(round(cost * 1.2, 3))
-    av_price = str(round(cost/(nx.dijkstra_path_length(tube_map,start_point,end_point)),3))
-    rounded_cost = str(round(cost, 3))
+    cost = UPrice(start_point,end_point)
+    peak_cost = round(UPeakPrice(start_point,end_point),2)
+    av_price = round(UPricePerMile(start_point,end_point),3)
+    rounded_cost = round(cost, 3)
     return render_template('result.html', current_user=current_user,av_price=av_price,peak_cost=peak_cost, stations=stations, cost=rounded_cost, end_point=end_point, start_point=start_point)
     
     
@@ -129,7 +139,7 @@ def result():
     
   
     # return render_template('result.html')
-
+#LOGIN PAGE
 @app.route('/login',methods=['GET', 'POST'])
 def login():
   if current_user.is_authenticated:
@@ -152,6 +162,7 @@ def login():
   
   
   return render_template('login.html')
+#ERROR PAGE
 @app.errorhandler(500)
 def internal_error(error):
     return render_template('500.html'), 500
@@ -163,7 +174,7 @@ def stations(station_id=None):
     pass
   return render_template('stations.html')
 
-
+#LOGOUT FUNCTION
 @app.route('/logout/')
 @login_required
 def logout():
