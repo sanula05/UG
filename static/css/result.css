@@ -94,7 +94,10 @@ body {
     background-color: #bdb7b7;
     max-height: 100vh;
     overflow: hidden;
-    /* background-image: url("underground.png"); */
+    /* background-image: linear-gradient(to bottom,
+    #DE2110,
+    #0009AB) ; */
+
  }
 .terminal-station {
   background-color: white;

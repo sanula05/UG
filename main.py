@@ -8,7 +8,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import tube as t
 from werkzeug.security import generate_password_hash, check_password_hash
-
+import heapq
 
 #POPULATES THE GRAPH 
 tube_map = nx.Graph()
@@ -18,6 +18,34 @@ for station in t.tube_data.keys():
 for start_station, connections in t.tube_data.items():
     for end_station, distance in connections.items():
         tube_map.add_edge(start_station, end_station, weight=distance)
+
+#DIKJSTRA ALGORITHM
+def dijkstra(graph, start, end):
+
+  distances = {station: float('inf') for station in graph}
+  distances[start] = 0
+  paths = {station: [] for station in graph}
+  priority_queue = [(0, start)]
+
+  while priority_queue:
+    current_distance, current_station = heapq.heappop(priority_queue)
+
+    if current_distance > distances[current_station]:
+        continue
+
+    for neighbor, weight in graph[current_station].items():
+        distance = current_distance + weight
+
+        if distance < distances[neighbor]:
+            distances[neighbor] = distance
+            heapq.heappush(priority_queue, (distance, neighbor))
+            paths[neighbor] = paths[current_station] + [current_station]
+
+  if distances[end] == float('inf'):
+    return [], [], []  
+
+  return [start] + paths[end] + [end], distances[end]
+
 #COST CALCUTAION FUNCTIONS
 def UPrice(start,end):
   cost = nx.dijkstra_path_length(tube_map, start, end) * 5

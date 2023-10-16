@@ -1,5 +1,8 @@
 {% extends 'base.html'%}
-{% block head %}<link rel="stylesheet" href="{{url_for('static', filename='css/result.css')}}">{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{url_for('static', filename='css/result.css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename='css/styles.css')}}">
+{% endblock %}
 {% block content %}
 <div class="option" >
 <form class='form' action="#" method='post'>
@@ -23,7 +26,8 @@
     <option value="{{station}}">{{station}}</option>
     {% endfor %}
   </select>
-  <button type="submit" class="btn btn-light">submit </button> 
+  <button type="submit" class="btn btn-outline-success">submit</button>
+  <!-- <button type="submit" class="btn btn-light">submit </button>  -->
 </form>
 </div>
 {% endblock %}
