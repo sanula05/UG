@@ -84,12 +84,12 @@ class UserDetails(UserMixin,db.Model):
   city = db.Column(db.String(32))
   password = db.Column(db.String(32))
 
-# class UserSearches(db.Model):
-#   __tablename__ = "UserSearches"
-#   id = db.Column(db.Integer, primary_key=True)
-#   user_id = db.Column(db.Integer)
-#   start_station = db.Column(db.String(32))
-#   end_station = db.Column(db.String(32))
+class UserSearches(db.Model):
+  __tablename__ = "UserSearches"
+  id = db.Column(db.Integer, primary_key=True)
+  user_id = db.Column(db.Integer)
+  start_station = db.Column(db.String(32))
+  end_station = db.Column(db.String(32))
 
 class Stations(db.Model):
   __tablename__ = "Stations"
@@ -152,6 +152,9 @@ def result():
   if "start_point" and "end_point" in session:
     start_point = session["start_point"]
     end_point = session["end_point"]
+    user_search = UserSearches(user_id=current_user.id, start_station=start_point, end_station=end_point)
+    db.session.add(user_search)
+    db.session.commit()
     stations = nx.dijkstra_path(tube_map,start_point,end_point)
     del stations[0]
     del stations[len(stations)-1]
@@ -159,11 +162,12 @@ def result():
     peak_cost = round(UPeakPrice(start_point,end_point),2)
     av_price = round(UPricePerMile(start_point,end_point),3)
     rounded_cost = round(cost, 3)
-    return render_template('result.html', current_user=current_user,av_price=av_price,peak_cost=peak_cost, stations=stations, cost=rounded_cost, end_point=end_point, start_point=start_point)
+    user_searches = UserSearches.query.filter_by(user_id=current_user.id).all()
+    return render_template('result.html', current_user=current_user,av_price=av_price,peak_cost=peak_cost, stations=stations, cost=rounded_cost, end_point=end_point, start_point=start_point, user_searches=user_searches)
     
     
   else:
-   return redirect(url_for("main"))
+   return redirect(url_for("main")) 
     
   
     # return render_template('result.html')
